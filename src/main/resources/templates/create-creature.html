@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Game - Crear Criatura</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/login.css">
+    <style>
+        /* Specific adjustments for this page */
+        .login-box {
+            width: 450px;
+            /* Slightly wider for selects */
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #111;
+            color: #fff;
+            font-size: 14px;
+            transition: 0.3s;
+            appearance: none;
+            /* Remove default arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23f1c40f%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
+        }
+
+        select:focus {
+            border-color: #f1c40f;
+            box-shadow: 0 0 8px rgba(241, 196, 15, 0.5);
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-overlay"></div>
+
+    <div class="login-container">
+        <div class="login-box">
+            <!-- Header -->
+            <div class="login-header">
+                <i class="fas fa-paw"></i>
+                <h1>Nueva Criatura</h1>
+                <p class="subtitle">Forja a tu campeón para la batalla</p>
+            </div>
+
+            <!-- Opción 1: Creación Asistida -->
+            <div class="panel"
+                style="background: rgba(46, 204, 113, 0.1); border: 1px dashed #2ecc71; padding: 15px; margin-bottom: 25px; text-align: center;">
+                <h4 style="color: #2ecc71; margin-bottom: 10px; font-size: 0.9rem;">¿Sin ideas?</h4>
+                <form th:action="@{/crear-criatura/auto}" method="post">
+                    <button type="submit" class="btn-login"
+                        style="background: linear-gradient(90deg, #27ae60, #2ecc71); margin-top: 0;">
+                        <i class="fas fa-magic"></i> Creación Asistida (Aleatoria)
+                    </button>
+                </form>
+                <p style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">El sistema elegirá una combinación válida de
+                    raza y nombre.</p>
+            </div>
+
+            <div class="separator">
+                <span>Creación Manual</span>
+            </div>
+
+            <!-- Formulario -->
+            <form th:action="@{/crear-criatura}" method="post" class="login-form">
+
+                <!-- Campo Nombre -->
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-signature"></i>
+                        Nombre
+                    </label>
+
+                    <!-- Toggle: Nombre Pool vs Custom -->
+                    <div style="margin-bottom: 10px; font-size: 0.9rem;">
+                        <label class="checkbox-container" style="display:inline-flex;">
+                            <input type="checkbox" id="checkCustomName" onchange="toggleNameInput()">
+                            <span class="checkmark" style="position:relative; margin-right:8px;"></span>
+                            Usar Nombre Personalizado
+                        </label>
+                    </div>
+
+                    <!-- Select: Nombres del Pool -->
+                    <select id="nombreSelect" name="nombreCanon">
+                        <option value="" disabled selected>Selecciona un nombre del pool...</option>
+                        <option th:each="n : ${nombresBase}" th:value="${n}" th:text="${n}">Aragorn</option>
+                        <!-- Fallback -->
+                        <option th:if="${nombresBase == null}" value="Héroe Genérico">Héroe Genérico</option>
+                    </select>
+
+                    <!-- Input: Nombre Custom -->
+                    <input type="text" id="nombreCustom" name="nombreCustom" placeholder="Ej. TuNombreEpico..."
+                        style="display:none;" disabled required>
+                </div>
+
+                <!-- Campo Raza -->
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-dna"></i>
+                        Raza
+                    </label>
+
+                    <!-- Toggle: Canónica vs Custom -->
+                    <div style="margin-bottom: 10px; font-size: 0.9rem;">
+                        <label class="checkbox-container" style="display:inline-flex;">
+                            <input type="checkbox" id="checkCustomRace" onchange="toggleRaceInput()">
+                            <span class="checkmark" style="position:relative; margin-right:8px;"></span>
+                            Crear Raza Personalizada
+                        </label>
+                    </div>
+
+                    <!-- Select: Razas Canónicas -->
+                    <select id="razaSelect" name="razaCanon">
+                        <option value="" disabled selected>Selecciona una raza del pool...</option>
+                        <!-- Iteration over canonical races from backend -->
+                        <option th:each="r : ${razasBase}" th:value="${r}" th:text="${r}">Humano</option>
+                        <!-- SATIRICAL FALLBACKS -->
+                        <option th:if="${razasBase == null}" value="Funcionario" title="Resistente pero lento">
+                            Funcionario</option>
+                        <option th:if="${razasBase == null}" value="Político" title="Magia alta, promesas vacías">
+                            Político</option>
+                        <option th:if="${razasBase == null}" value="Ciudadano" title="Equilibrado y sufrido">Ciudadano
+                        </option>
+                        <option th:if="${razasBase == null}" value="Manifestante" title="Rápido y ruidoso">Manifestante
+                        </option>
+                        <option th:if="${razasBase == null}" value="Periodista" title="Caos informativo">Periodista
+                        </option>
+                        <option th:if="${razasBase == null}" value="Ministro" title="Desaparece fondos">Ministro
+                        </option>
+                        <option th:if="${razasBase == null}" value="Autónomo" title="Lucha fiscal infinita">Autónomo
+                        </option>
+                        <option th:if="${razasBase == null}" value="Juez" title="Ralentiza el tiempo">Juez</option>
+                        <option th:if="${razasBase == null}" value="Sindicalista" title="Asamblea eterna">Sindicalista
+                        </option>
+                        <option th:if="${razasBase == null}" value="Cayetano" title="Influencia social">Cayetano
+                        </option>
+                    </select>
+
+                    <!-- Input: Raza Custom -->
+                    <input type="text" id="razaCustom" name="razaCustom" placeholder="Nombre de tu nueva raza..."
+                        style="display:none;" disabled required>
+
+                    <small style="display:block; margin-top:5px; color:#aaa;">
+                        Categoría: <strong style="color:#f1c40f;">Ciudadano</strong>
+                    </small>
+                </div>
+
+                <!-- Race Info Panel (Updates dynamically) -->
+                <div id="raceInfo" class="panel"
+                    style="margin-top:10px; border:1px solid #555; background:rgba(0,0,0,0.3); padding:10px; border-radius:4px; display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <strong style="color:#f1c40f;" id="raceNameDisplay">Raza</strong>
+                        <span style="font-size:0.8rem; color:#aaa;">Stats Base</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; font-size:0.9rem;">
+                        <div><i class="fas fa-fist-raised" style="color:#e74c3c;"></i> Fuerza: <span id="statStr"
+                                style="color:#fff;">0</span></div>
+                        <div><i class="fas fa-shield-alt" style="color:#3498db;"></i> Resistencia: <span id="statRes"
+                                style="color:#fff;">0</span></div>
+                        <div><i class="fas fa-running" style="color:#2ecc71;"></i> Velocidad: <span id="statVel"
+                                style="color:#fff;">0</span></div>
+                        <div><i class="fas fa-hat-wizard" style="color:#9b59b6;"></i> Magia: <span id="statMag"
+                                style="color:#fff;">0</span></div>
+                    </div>
+                    <p id="raceDesc"
+                        style="font-size:0.85rem; margin-top:8px; color:#ccc; font-style:italic; border-top:1px solid #444; padding-top:5px;">
+                        Descripción de la raza...
+                    </p>
+                </div>
+
+                <script>
+                    const raceData = {
+                        'Funcionario': { str: 5, res: 8, vel: 5, mag: 6, desc: 'Inmune al estrés. Habilidad: "Trámite Infinito".' },
+                        'Político': { str: 5, res: 6, vel: 6, mag: 7, desc: 'Canaliza magia en promesas. Habilidad: "Rueda de prensa confusa".' },
+                        'Ciudadano': { str: 6, res: 6, vel: 6, mag: 6, desc: 'Equilibrado pero frustrado. Habilidad: "Cola del supermercado".' },
+                        'Manifestante': { str: 7, res: 6, vel: 7, mag: 4, desc: 'Resistente a gases. Habilidad: "¡No nos representan!".' },
+                        'Periodista': { str: 4, res: 5, vel: 8, mag: 7, desc: 'Caos informativo. Habilidad: "Exclusiva inventada".' },
+                        'Ministro': { str: 5, res: 7, vel: 4, mag: 8, desc: 'Desaparece fondos. Habilidad: "Transferencia invisible".' },
+                        'Autónomo': { str: 6, res: 6, vel: 6, mag: 6, desc: 'Lucha contra el IVA. Habilidad: "Facturar sin cobrar".' },
+                        'Juez': { str: 5, res: 7, vel: 4, mag: 8, desc: 'Altera el tiempo. Habilidad: "Providencia".' },
+                        'Sindicalista': { str: 6, res: 6, vel: 6, mag: 6, desc: 'Guerrero de pancarta. Habilidad: "Asamblea eterna".' },
+                        'Cayetano': { str: 5, res: 6, vel: 6, mag: 7, desc: 'Influencia social. Habilidad: "¿Sabes quién es mi padre?".' }
+                    };
+
+                    document.getElementById('razaSelect').addEventListener('change', function () {
+                        const selectedRace = this.value;
+                        const infoPanel = document.getElementById('raceInfo');
+
+                        if (raceData[selectedRace]) {
+                            const stats = raceData[selectedRace];
+                            document.getElementById('raceNameDisplay').innerText = selectedRace;
+                            document.getElementById('statStr').innerText = stats.str;
+                            document.getElementById('statRes').innerText = stats.res;
+                            document.getElementById('statVel').innerText = stats.vel;
+                            document.getElementById('statMag').innerText = stats.mag;
+                            document.getElementById('raceDesc').innerText = stats.desc;
+                            infoPanel.style.display = 'block';
+                        } else {
+                            infoPanel.style.display = 'none';
+                        }
+                    });
+
+                    function toggleRaceInput() {
+                        const isCustom = document.getElementById('checkCustomRace').checked;
+                        const select = document.getElementById('razaSelect');
+                        const input = document.getElementById('razaCustom');
+                        const infoPanel = document.getElementById('raceInfo');
+
+                        if (isCustom) {
+                            select.style.display = 'none';
+                            select.disabled = true;
+                            input.style.display = 'block';
+                            input.disabled = false;
+                            input.focus();
+                            infoPanel.style.display = 'none'; // Hide preview for custom
+                        } else {
+                            select.style.display = 'block';
+                            select.disabled = false;
+                            input.style.display = 'none';
+                            input.disabled = true;
+                            // Trigger change to show stats if one is selected
+                            if (select.value) {
+                                select.dispatchEvent(new Event('change'));
+                            }
+                        }
+                    }
+
+                    function toggleNameInput() {
+                        const isCustom = document.getElementById('checkCustomName').checked;
+                        const select = document.getElementById('nombreSelect');
+                        const input = document.getElementById('nombreCustom');
+
+                        if (isCustom) {
+                            select.style.display = 'none';
+                            select.disabled = true;
+                            input.style.display = 'block';
+                            input.disabled = false;
+                            input.focus();
+                        } else {
+                            select.style.display = 'block';
+                            select.disabled = false;
+                            input.style.display = 'none';
+                            input.disabled = true;
+                        }
+                    }
+                </script>
+
+                <!-- Campo Imagen URL Importada (Opcional) -->
+                <div class="form-group">
+                    <label for="imagenUrl">
+                        <i class="fas fa-image"></i>
+                        URL de Imagen (Opcional)
+                    </label>
+                    <input type="text" id="imagenUrl" name="imagenUrl" placeholder="https://ejemplo.com/avatar.png">
+                </div>
+
+                <!-- Botón Crear -->
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-hammer"></i>
+                    Crear Criatura
+                </button>
+            </form>
+
+            <!-- Separador -->
+            <div class="separator">
+                <span>o</span>
+            </div>
+
+            <!-- Volver -->
+            <div class="register-section">
+                <a href="/game.html" class="btn-register" style="border: 1px solid #7f8c8d; color: #7f8c8d;">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al Tablero
+                </a>
+            </div>
+
+            <!-- Footer -->
+            <div class="login-footer">
+                <p>&copy; 2026. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

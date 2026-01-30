@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG PARTY</title>
+    <!-- Fonts and Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/game.css">
+</head>
+
+<body>
+
+    <div class="background-overlay"></div>
+
+    <div class="dashboard-container">
+
+        <!-- SIDEBAR: User & Characters -->
+        <aside class="sidebar">
+
+            <!-- User Panel -->
+            <div class="panel user-profile">
+                <!-- Image handling: Checks if image is available, otherwise default -->
+                <img th:src="${usuario.imagen != null ? usuario.imagen : 'img/default-avatar.png'}" alt="Perfil"
+                    class="profile-img">
+
+                <h2 th:text="${usuario.username}">NombreUsuario</h2>
+                <div class="user-role">
+                    <i class="fas fa-crown"></i> <span th:text="${usuario.rol}">Rol del Jugador</span>
+                </div>
+            </div>
+
+            <!-- Criaturas List -->
+            <div class="creatures-section">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="margin:0;"><i class="fas fa-paw"></i> Tus Criaturas</h3>
+                    <span style="font-size:0.8rem; color:#aaa;"
+                        th:text="'(' + ${#lists.size(criaturas)} + '/10)'">(3/10)</span>
+                </div>
+
+                <div th:each="criatura : ${criaturas}" class="creature-card panel" style="position:relative;">
+
+                    <!-- Delete Creature Button (Top Right) -->
+                    <form th:action="@{/criatura/eliminar}" method="post" style="position:absolute; top:5px; right:5px;"
+                        onsubmit="return confirm('¿Estás seguro de eliminar a este héroe permanentemente?');">
+                        <input type="hidden" name="id" th:value="${criatura.id}" />
+                        <button type="submit" style="background:none; border:none; color:#e74c3c; cursor:pointer;"
+                            title="Eliminar Héroe">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </form>
+
+                    <h4 th:text="${criatura.nombre}"
+                        style="font-family:'Cinzel'; color:#f1c40f; margin-bottom:5px; padding-right:20px;">
+                        Nombre</h4>
+
+                    <div class="creature-stats">
+                        <div class="stat-row">
+                            <span><i class="fas fa-level-up-alt"></i> Nivel:</span>
+                            <span th:text="${criatura.nivel}">1</span>
+                        </div>
+                        <div class="stat-row">
+                            <span><i class="fas fa-dna"></i> Raza:</span>
+                            <span th:text="${criatura.raza}">Humano</span>
+                        </div>
+                        <div class="stat-row">
+                            <span><i class="fas fa-heart"></i> Vida:</span>
+                            <span th:text="${criatura.vida}">100</span>
+                        </div>
+                    </div>
+
+                    <!-- Inventory: Weapons, Shields, Potions -->
+                    <div class="inventory-section">
+                        <strong><i class="fas fa-khanda"></i> Armas:</strong>
+                        <ul class="inventory-list">
+                            <li th:each="arma : ${criatura.armas}" th:text="${arma.nombre}">Espada</li>
+                            <li th:if="${#lists.isEmpty(criatura.armas)}">Sin armas</li>
+                        </ul>
+                    </div>
+
+                    <div class="inventory-section">
+                        <strong><i class="fas fa-shield-alt"></i> Escudos:</strong>
+                        <ul class="inventory-list">
+                            <li th:each="escudo : ${criatura.escudos}" th:text="${escudo.nombre}">Escudo Madera</li>
+                            <li th:if="${#lists.isEmpty(criatura.escudos)}">Sin escudo</li>
+                        </ul>
+                    </div>
+
+                    <div class="inventory-section">
+                        <strong><i class="fas fa-flask"></i> Pociones:</strong>
+                        <ul class="inventory-list">
+                            <li th:each="pocion : ${criatura.pociones}" th:text="${pocion.nombre}">Curación Menor</li>
+                            <li th:if="${#lists.isEmpty(criatura.pociones)}">Sin pociones</li>
+                        </ul>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="actions">
+                        <!-- Jugar -->
+                        <form th:action="@{/jugar}" method="post" style="flex:1; min-width: 45%;">
+                            <input type="hidden" name="criaturaId" th:value="${criatura.id}" />
+                            <button type="submit" class="btn-action btn-play">
+                                <i class="fas fa-dice-d20"></i> Jugar
+                            </button>
+                        </form>
+                        <!-- Pasar -->
+                        <form th:action="@{/pasar}" method="post" style="flex:1; min-width: 45%;">
+                            <input type="hidden" name="criaturaId" th:value="${criatura.id}" />
+                            <button type="submit" class="btn-action btn-pass">
+                                <i class="fas fa-forward"></i> Pasar
+                            </button>
+                        </form>
+                        <!-- Atacar -->
+                        <form th:action="@{/atacar}" method="post" style="flex:1; min-width: 45%;">
+                            <input type="hidden" name="criaturaId" th:value="${criatura.id}" />
+                            <button type="submit" class="btn-action btn-attack">
+                                <i class="fas fa-fist-raised"></i> Atacar
+                            </button>
+                        </form>
+                        <!-- Defender -->
+                        <form th:action="@{/defender}" method="post" style="flex:1; min-width: 45%;">
+                            <input type="hidden" name="criaturaId" th:value="${criatura.id}" />
+                            <button class="btn-action btn-defend">
+                                <i class="fas fa-shield-alt"></i> Defender
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Create New Creature (Limit Check) -->
+                <div class="panel" style="text-align:center; padding:15px;">
+                    <div th:if="${#lists.size(criaturas) < 10}">
+                        <a href="/create-creature.html" style="color:#f1c40f; font-weight:bold;">
+                            <i class="fas fa-plus-circle"></i> Crear Criatura
+                        </a>
+                    </div>
+                    <div th:unless="${#lists.size(criaturas) < 10}">
+                        <p style="color:#e74c3c; font-size:0.9rem;">Límite de héroes alcanzado (10/10).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MY RUNS SECTION -->
+            <div class="runs-section" style="margin-top: 30px; border-top: 1px solid #444; padding-top: 20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="margin:0; font-size:1.1rem; color:#3498db;"><i class="fas fa-gamepad"></i> Pool de
+                        Aventuras
+                    </h3>
+                    <span style="font-size:0.8rem; color:#aaa; font-weight:bold;"
+                        th:text="'Slots: ' + ${#lists.size(misRuns)} + '/5'">(Slots: 2/5)</span>
+                </div>
+
+                <div th:each="run : ${misRuns}" class="panel"
+                    style="padding: 10px; border-color: #3498db; background: rgba(52, 152, 219, 0.1);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong th:text="${run.nombreRun}">Partida 1</strong>
+                            <div style="font-size:0.8rem; color:#aaa;">
+                                Cap <span th:text="${run.capituloActual}">2</span> - <span
+                                    th:text="${run.timestamp}">Hace 2h</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:5px;">
+                            <!-- Continue -->
+                            <form th:action="@{/run/cargar}" method="post">
+                                <input type="hidden" name="runId" th:value="${run.id}" />
+                                <button type="submit"
+                                    style="background:none; border:none; color:#2ecc71; cursor:pointer;"
+                                    title="Continuar">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </form>
+                            <!-- Delete -->
+                            <form th:action="@{/run/eliminar}" method="post"
+                                onsubmit="return confirm('¿Borrar esta partida? Se perderá el progeso.');">
+                                <input type="hidden" name="runId" th:value="${run.id}" />
+                                <button type="submit"
+                                    style="background:none; border:none; color:#e74c3c; cursor:pointer;" title="Borrar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <!-- Checkpoint Dropdown -->
+                        <div style="flex-basis: 100%; margin-top: 5px;">
+                            <details style="color:#aaa; font-size:0.8rem;">
+                                <summary style="cursor:pointer; outline:none;">Checkpoints <i
+                                        class="fas fa-caret-down"></i></summary>
+                                <ul
+                                    style="list-style:none; padding-left:10px; margin-top:5px; border-left:1px solid #3498db;">
+                                    <!-- Dynamic Checkpoints from Run -->
+                                    <li th:each="cp : ${run.checkpoints}" style="margin-bottom:3px;">
+                                        <form th:action="@{/run/reanudar}" method="post" style="display:inline;">
+                                            <input type="hidden" name="runId" th:value="${run.id}" />
+                                            <input type="hidden" name="checkpointId" th:value="${cp.id}" />
+                                            <button type="submit"
+                                                style="background:none; border:none; color:#ddd; cursor:pointer; text-align:left;"
+                                                th:text="${cp.nombre}">Inicio Cap 1</button>
+                                        </form>
+                                    </li>
+                                    <!-- Fallback Examples -->
+                                    <li th:if="${run.checkpoints == null}">
+                                        <form th:action="@{/run/reanudar}" method="post" style="display:inline;">
+                                            <input type="hidden" name="runId" th:value="${run.id}" />
+                                            <input type="hidden" name="checkpointId" value="start" />
+                                            <button type="submit"
+                                                style="background:none; border:none; color:#ddd; cursor:pointer;">Inicio
+                                                Run</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </details>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create New Run -->
+                <div class="panel" style="text-align:center; padding:10px; border-color:#3498db;">
+                    <div th:if="${#lists.size(misRuns) < 5}">
+                        <form th:action="@{/run/nuevo}" method="post"
+                            onsubmit="return confirm('¿Generar una nueva aventura procedimental?');">
+                            <button type="submit"
+                                style="background:none; border:none; color:#3498db; font-weight:bold; cursor:pointer;">
+                                <i class="fas fa-magic"></i> Generar Aventura
+                            </button>
+                        </form>
+                    </div>
+                    <div th:unless="${#lists.size(misRuns) < 5}">
+                        <p style="color:#e74c3c; font-size:0.8rem; margin:0;">No hay slots libres (5/5). Borra una
+                            aventura.</p>
+                        <p style="color:#e74c3c; font-size:0.8rem; margin:0;">(Admin: Libera slots para copiar partidas
+                            ajenas)</p>
+                    </div>
+                </div>
+
+                <!-- Admin Only Controls -->
+                <div th:if="${usuario.esAdmin}"
+                    style="margin-top:20px; border-top:1px dashed #f1c40f; padding-top:10px;">
+                    <h4 style="color:#f1c40f; font-size:0.9rem; text-align:center;">ADMIN MODE</h4>
+                    <form th:action="@{/admin/runs}" method="get" style="text-align:center; margin-top:5px;">
+                        <button
+                            style="background:#f1c40f; color:black; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:0.8rem;">
+                            Ver Todo / Gestionar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT: Story & Events -->
+        <main class="main-content">
+
+            <!-- PLAYBACK MODE BANNER -->
+            <div th:if="${esPlayback}" class="panel"
+                style="background: rgba(52, 152, 219, 0.2); border-color: #3498db; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-film" style="color: #3498db; font-size: 1.5rem;"></i>
+                    <div>
+                        <h3 style="margin: 0; color: #3498db;">MODO REPRODUCCIÓN (PLAYBACK)</h3>
+                        <p style="margin: 0; font-size: 0.8rem; color: #aaa;">Observando historial guardado</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <!-- Next Step in History -->
+                    <form th:action="@{/playback/siguiente}" method="post">
+                        <button type="submit" class="btn-action" style="background: #3498db; color: white;">
+                            <i class="fas fa-step-forward"></i> Siguiente Paso
+                        </button>
+                    </form>
+                    <!-- Take Control Here -->
+                    <form th:action="@{/playback/tomar-control}" method="post"
+                        onsubmit="return confirm('¿Reanudar desde este punto? Se perderá el futuro guardado.');">
+                        <button type="submit" class="btn-action" style="background: #e67e22; color: white;">
+                            <i class="fas fa-hand-paper"></i> Retomar Aquí
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Feedback / Error Messages -->
+            <div th:if="${error != null}" class="panel feedback-msg error-msg">
+                <h3 style="color:#e74c3c; margin-top:0;"><i class="fas fa-exclamation-triangle"></i> Error</h3>
+                <p th:text="${error}">Ha ocurrido un error en el combate.</p>
+            </div>
+
+            <div th:if="${excepcion != null}" class="panel feedback-msg error-msg">
+                <h3 style="color:#e74c3c; margin-top:0;"><i class="fas fa-skull"></i> Excepción Crítica</h3>
+                <p th:text="${excepcion.message}">Mensaje de excepción detallado.</p>
+            </div>
+
+            <!-- Run Progress Tracker -->
+            <div class="run-progress">
+                <!-- Chapter 1 -->
+                <div class="step-group">
+                    <div class="step-group-title">Capítulo 1</div>
+                    <div class="steps-container">
+                        <div class="step-dot"
+                            th:classappend="${progreso > 0} ? 'completed' : (${progreso == 0} ? 'active' : '')"
+                            title="Evento 1"></div>
+                        <div class="step-dot"
+                            th:classappend="${progreso > 1} ? 'completed' : (${progreso == 1} ? 'active' : '')"
+                            title="Evento 2"></div>
+                        <div class="step-dot"
+                            th:classappend="${progreso > 2} ? 'completed' : (${progreso == 2} ? 'active' : '')"
+                            title="Combate"></div>
+                    </div>
+                </div>
+                <!-- Chapter 2 -->
+                <div class="step-group">
+                    <div class="step-group-title">Capítulo 2</div>
+                    <div class="steps-container">
+                        <div class="step-dot"
+                            th:classappend="${progreso > 3} ? 'completed' : (${progreso == 3} ? 'active' : '')"
+                            title="Evento 1"></div>
+                        <div class="step-dot"
+                            th:classappend="${progreso > 4} ? 'completed' : (${progreso == 4} ? 'active' : '')"
+                            title="Evento 2"></div>
+                        <div class="step-dot"
+                            th:classappend="${progreso > 5} ? 'completed' : (${progreso == 5} ? 'active' : '')"
+                            title="Combate"></div>
+                    </div>
+                </div>
+                <!-- Chapter 3 -->
+                <div class="step-group">
+                    <div class="step-group-title">Capítulo 3</div>
+                    <div class="steps-container">
+                        <div class="step-dot"
+                            th:classappend="${progreso > 6} ? 'completed' : (${progreso == 6} ? 'active' : '')"
+                            title="Evento 1"></div>
+                        <div class="step-dot"
+                            th:classappend="${progreso > 7} ? 'completed' : (${progreso == 7} ? 'active' : '')"
+                            title="Evento 2"></div>
+                        <div class="step-dot"
+                            th:classappend="${progreso > 8} ? 'completed' : (${progreso == 8} ? 'active' : '')"
+                            title="Combate"></div>
+                    </div>
+                </div>
+                <!-- Final Boss -->
+                <div class="step-group" style="flex: 0.5;">
+                    <div class="step-group-title" style="color:#e74c3c;">BOSS</div>
+                    <div class="steps-container">
+                        <div class="step-dot boss-node" th:classappend="${progreso == 9} ? 'active' : ''"
+                            title="Combate Final"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header -->
+            <header
+                style="border-bottom: 2px solid #555; padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+				<h1 th:text="${tituloPagina}">Título por defecto</h1>
+                    <p>Sigue los acontecimientos de tu aventura.</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <!-- Auto-Resolve Button -->
+                    <form th:if="${!combateTerminado and !esPlayback}" th:action="@{/run/simular}" method="post"
+                        onsubmit="return confirm('¿Simular el resto de la partida automáticamente?');">
+                        <button type="submit" class="btn-action"
+                            style="background: linear-gradient(90deg, #8e44ad, #9b59b6); color: white; padding: 8px 15px; font-size: 0.9rem; border-radius: 4px;">
+                            <i class="fas fa-magic"></i> Simular Trámite
+                        </button>
+                    </form>
+
+                    <div th:if="${categoria != null}" class="category-badge">
+                        Nivel Burocrático <span th:text="${categoria}">1</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chapter Panel -->
+            <section class="panel">
+                <div style="display:flex; justify-content:space-between;">
+                    <h2><i class="fas fa-file-invoice"></i> <span
+                            th:text="${capitulo != null ? capitulo.titulo : 'Prólogo'}">Expediente N.° 1</span></h2>
+                    <h3 style="margin:0; color:#aaa; font-size:1rem;" th:text="${faseActual}">Fase de Alegaciones</h3>
+                </div>
+
+                <p th:text="${capitulo != null ? capitulo.descripcion : 'La aventura está por comenzar...'}"
+                    style="font-size: 1.1rem; font-style: italic; margin-bottom: 20px; color: #f0f0f0;">
+                    Descripción narrativa del capítulo actual.
+                </p>
+
+                <!-- Event Encounter Section (Dynamic Choices A, B, C) -->
+                <div th:if="${eventoEncuentro != null}" class="panel"
+                    style="background: rgba(41, 128, 185, 0.15); border: 1px solid #3498db; text-align: center;">
+                    <h3 style="color: #3498db; margin-bottom: 15px;">
+                        <i class="fas fa-exclamation-circle"></i> <span th:text="${eventoEncuentro.nombre}">Evento
+                            Administrativo</span>
+                    </h3>
+
+                    <p th:text="${eventoEncuentro.descripcion}"
+                        style="font-size: 1.15rem; margin-bottom: 30px; line-height: 1.6; color: #ddd;">
+                        Te encuentras con una cola infinita en la ventanilla 4...
+                    </p>
+
+                    <!-- Options Grid -->
+                    <div class="options-grid"
+                        style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+
+                        <!-- Dynamic Iteration over Options -->
+                        <div th:each="opcion : ${eventoEncuentro.opciones}" class="option-card"
+                            style="background:rgba(0,0,0,0.4); padding:20px; border-radius:8px; border:1px solid #555; display:flex; flex-direction:column; justify-content:space-between;">
+
+                            <div>
+                                <h4 th:text="${opcion.titulo}"
+                                    style="color:#f1c40f; margin-bottom:10px; font-size:1.1rem;">Opción A</h4>
+                                <p th:text="${opcion.descripcion}"
+                                    style="font-size:0.9rem; color:#ccc; margin-bottom:15px;">
+                                    Esperar pacientemente y rellenar el formulario 38B.
+                                </p>
+                            </div>
+
+                            <form th:action="@{/evento/elegir}" method="post">
+                                <input type="hidden" name="opcionId" th:value="${opcion.id}" />
+                                <button type="submit" class="btn-action"
+                                    style="width:100%; background: linear-gradient(90deg, #3498db, #2980b9); color: white; padding: 10px; border-radius: 4px; border:none; cursor:pointer; font-weight:bold;">
+                                    <i class="fas fa-check"></i> Seleccionar
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+
+                    <!-- Outcome Feedback -->
+                    <div th:if="${resultadoDado != null}"
+                        style="margin-top: 25px; padding: 15px; background: rgba(241, 196, 15, 0.1); border-radius: 6px; border-left: 4px solid #f1c40f; text-align:left;">
+                        <p style="color: #f1c40f; font-weight: bold; margin:0 0 5px 0;">
+                            <i class="fas fa-dice-d20"></i> Resultado de la Gestión: <span
+                                th:text="${resultadoDado}">15</span>
+                        </p>
+                        <p th:text="${outcomeMensaje}" style="margin:0; font-style:italic;">Has logrado sellar la
+                            instancia a tiempo.</p>
+                    </div>
+                </div>
+
+                <!-- Final Monster Section (Visible only in Combat phases) -->
+                <div th:if="${monstruo != null}" class="panel"
+                    style="background: rgba(100, 0, 0, 0.3); border-color: #c0392b;">
+                    <h3 style="color: #e74c3c;">
+                        <i class="fas" th:classappend="${esJefeFinal} ? 'fa-briefcase' : 'fa-skull'"></i>
+                        <span th:text="${esJefeFinal} ? 'JEFE DE DEPARTAMENTO: ' : 'ADVERSARIO: '">ENEMIGO: </span>
+                        <span th:text="${monstruo.nombre}">La Burocracia Viviente</span>
+                    </h3>
+
+                    <!-- Boss Description -->
+                    <p th:text="${monstruo.descripcion}" style="color:#aaa; font-style:italic; margin-bottom:15px;">
+                        Una enorme masa de papeleo que bloquea el paso.
+                    </p>
+
+                    <!-- Boss Skills (If available) -->
+                    <div th:if="${!#lists.isEmpty(monstruo.habilidades)}"
+                        style="margin-bottom:20px; background:rgba(0,0,0,0.2); padding:10px; border-radius:4px;">
+                        <strong style="color:#e74c3c; font-size:0.9rem;">Habilidades Especiales:</strong>
+                        <ul
+                            style="list-style:none; padding:0; margin-top:5px; font-size:0.85rem; color:#ddd; display:flex; gap:10px; flex-wrap:wrap;">
+                            <li th:each="habilidad : ${monstruo.habilidades}">
+                                <i class="fas fa-bolt" style="color:#f1c40f;"></i> <span th:text="${habilidad}">Traba
+                                    administrativa</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <p><strong>Nivel:</strong> <span th:text="${monstruo.nivel}">50</span></p>
+                            <p><strong>Vida:</strong> <span th:text="${monstruo.vida}">5000</span> HP</p>
+                        </div>
+                        <div style="font-size: 3rem; color: #c0392b;">
+                            <i class="fas fa-skull-crossbones"></i>
+                        </div>
+                    </div>
+
+                    <!-- Combat Controls: Start Round -->
+                    <div th:if="${!combateTerminado}" style="margin-top: 20px; text-align: center;">
+                        <form th:action="@{/combate/ronda}" method="post">
+                            <button type="submit" class="btn-action"
+                                style="background: linear-gradient(90deg, #c0392b, #e74c3c); color: white; padding: 15px 40px; font-size: 1.2rem; border-radius: 8px; box-shadow: 0 0 15px rgba(231, 76, 60, 0.4); width: 100%;">
+                                <i class="fas fa-swords"></i> COMBATIR RONDA
+                            </button>
+                        </form>
+                        <p style="font-size: 0.9rem; color: #aaa; margin-top: 10px;">
+                            <i class="fas fa-info-circle"></i> Inicia la ronda para resolver enfrentamientos por
+                            iniciativa.
+                            <br>
+                            <small th:if="${monstruo != null}">
+                                <i class="fas fa-dice"></i> Se tira 1 dado por héroe + Velocidad para calcular turnos.
+                            </small>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- VICTORY / LOOT PANEL -->
+                <div th:if="${recompensa != null}" class="panel"
+                    style="background: rgba(39, 174, 96, 0.2); border-color: #2ecc71; text-align: center;">
+                    <h2 style="color: #2ecc71; border-bottom-color: #27ae60;">
+                        <i class="fas fa-trophy"></i> ¡VICTORIA!
+                    </h2>
+                    <p style="font-size: 1.1rem;">El enemigo ha caído. ¡Tus héroes se fortalecen!</p>
+
+                    <div class="loot-grid"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; text-align: left;">
+                        <!-- Per Hero Loot -->
+                        <div th:each="heroLoot : ${recompensa.heroes}"
+                            style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                            <h4 style="color: #f1c40f; margin-bottom: 5px;" th:text="${heroLoot.nombreHeroe}">Héroe</h4>
+                            <ul style="list-style: none; padding: 0; font-size: 0.9rem; color: #ddd;">
+                                <li><i class="fas fa-heart" style="color:#e74c3c;"></i> +1 Vida Extra</li>
+                                <li><i class="fas fa-chart-line" style="color:#3498db;"></i> +10 en todas las Stats</li>
+                                <li th:if="${heroLoot.arma != null}"><i class="fas fa-khanda"></i> <span
+                                        th:text="${heroLoot.arma.nombre}">Espada</span></li>
+                                <li th:if="${heroLoot.escudo != null}"><i class="fas fa-shield-alt"></i> <span
+                                        th:text="${heroLoot.escudo.nombre}">Escudo</span></li>
+                                <li th:if="${heroLoot.pocion != null}"><i class="fas fa-flask"></i> <span
+                                        th:text="${heroLoot.pocion.nombre}">Poción</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/continuar}" method="post" style="margin-top: 25px;">
+                        <button type="submit" class="btn-action"
+                            style="background: linear-gradient(90deg, #f1c40f, #f39c12); color: black; padding: 12px 30px; font-size: 1.1rem;">
+                            CONTINUAR AVENTURA <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- DEFEAT PANEL -->
+                <div th:if="${derrota}" class="panel"
+                    style="background: rgba(0, 0, 0, 0.9); border-color: #7f8c8d; text-align: center;">
+                    <h2 style="color: #7f8c8d; border-bottom-color: #555;">
+                        <i class="fas fa-skull"></i> GAME OVER
+                    </h2>
+                    <p style="font-size: 1.2rem; color: #aaa;">Tu partida ha terminado. La oscuridad prevalece.</p>
+
+                    <form th:action="@{/reiniciar}" method="post" style="margin-top: 25px;">
+                        <button type="submit" class="btn-action"
+                            style="background: linear-gradient(90deg, #95a5a6, #7f8c8d); color: white; padding: 12px 30px; font-size: 1.1rem;">
+                            <i class="fas fa-redo"></i> JUGAR DE NUEVO
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Events Log -->
+            <section class="panel">
+                <h3><i class="fas fa-scroll"></i> Registro de Eventos</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li th:each="evento : ${eventos}" style="border-bottom: 1px solid #444; padding: 10px 0;">
+                        <span style="color: #f1c40f; font-weight: bold;" th:text="${evento.fechaHora}">[12:00]</span>
+                        <span th:text="${evento.descripcion}">El jugador ha entrado en la mazmorra.</span>
+                    </li>
+                    <li th:if="${#lists.isEmpty(eventos)}">No hay eventos recientes.</li>
+                </ul>
+            </section>
+
+        </main>
+    </div>
+
+</body>
+
+</html>
