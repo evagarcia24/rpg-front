@@ -10,9 +10,9 @@ import com.game.rpg_front.Usuario;
 
 @Controller	
 public class GameControllers {
-	@GetMapping("/")
-	public String index() {
-	    return "index";
+	@GetMapping("/login")
+	public String login() {
+	    return "login";
 	}
 
 	@GetMapping("/registro")
