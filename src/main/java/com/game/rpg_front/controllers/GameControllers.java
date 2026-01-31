@@ -10,10 +10,13 @@ import com.game.rpg_front.Usuario;
 
 @Controller	
 public class GameControllers {
-	@GetMapping("/login")
+
+	
+	@GetMapping("/") // Se puede cambiar cuando se haga una pagina de inicio antes del login. De esta manera funciona como si el login fuese la pagina de entrada (index)	
 	public String login() {
 	    return "login";
 	}
+
 
 	@GetMapping("/registro")
 	public String registro() {
