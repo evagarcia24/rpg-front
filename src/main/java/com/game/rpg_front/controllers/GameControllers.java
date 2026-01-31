@@ -12,10 +12,18 @@ import com.game.rpg_front.Usuario;
 public class GameControllers {
 
 	
-	@GetMapping("/") // Se puede cambiar cuando se haga una pagina de inicio antes del login. De esta manera funciona como si el login fuese la pagina de entrada (index)	
-	public String login() {
-	    return "login";
+	@GetMapping("/") // A completar la pagina de inicio antes del login
+	public String index() {
+	    return "index";
 	}
+	
+
+    // Página de login real
+    @GetMapping("/logging")
+    public String login() {
+        return "logging"; // Cambiado nombre del html para que no redirija al login de Spring Security
+    }
+
 
 
 	@GetMapping("/registro")
