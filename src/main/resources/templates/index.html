@@ -9,6 +9,10 @@
 
     <style>
         body {
+            display: flex;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
             background: #2c3e50;
             color: white;
             font-family: sans-serif;
@@ -26,6 +30,10 @@
             font-size: 1.3rem;
         }
 
+        div {
+            margin-bottom: 40px;
+        }
+
         a {
             color: #f1c40f;
             text-decoration: none;
@@ -34,6 +42,8 @@
             padding: 12px 25px;
             border-radius: 6px;
             transition: 0.3s;
+            display: inline-block;
+            margin-top: 20px;
         }
 
         a:hover {
@@ -44,12 +54,17 @@
 </head>
 
 <body>
+    <div>
+        <h1>RPG JUEGO ROL BUROCRACIA</h1>
+    </div>
 
-    <h1>RPG JUEGO ROL BUROCRACIA</h1>
+    <div>
+        <p>¿Podrás sobrevivir al trámite?</p>
+    </div>
 
-    <p>¿Podrás sobrevivir al trámite?</p>
-
-    <h1>EN CONSTRUCCIÓN</h1>
+    <div>
+        <h1>EN CONSTRUCCIÓN</h1>
+    </div>
 
     <a href="/logging">Iniciar Trámite (Jugar)</a>
 
