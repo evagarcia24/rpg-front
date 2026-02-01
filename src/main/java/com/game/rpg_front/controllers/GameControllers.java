@@ -26,9 +26,9 @@ public class GameControllers {
 
 
 
-	@GetMapping("/registro")
+	@GetMapping("/register")
 	public String registro() {
-	    return "registro";
+	    return "register";
 	}
 
 	@GetMapping("/forgot-password")
