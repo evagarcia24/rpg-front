@@ -1,12 +1,10 @@
 package com.game.rpg_front.controllers;
 
-import java.util.ArrayList;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import com.game.rpg_front.Usuario;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller	
 public class GameControllers {
@@ -18,10 +16,21 @@ public class GameControllers {
 	}
 	
 
-    // Página de login real
-    @GetMapping("/logging")
-    public String login() {
-        return "logging"; // Cambiado nombre del html para que no redirija al login de Spring Security
+ // 1. Esto sirve para MOSTRAR la página cuando escribes la URL
+    @GetMapping("/login")
+    public String mostrarLogin() {
+        return "login"; // Busca el archivo login.html
+    }
+
+    // 2. Esto sirve para RECIBIR los datos cuando pulsas el botón
+    @PostMapping("/login")
+    public String procesarLogin(@RequestParam String username, @RequestParam String password) {
+        
+        // Aquí es donde sucede la magia. 
+        // Por ahora, solo vamos a decir que si sale bien, te mande al inicio.
+        System.out.println("Usuario intentando entrar: " + username);
+        
+        return "redirect:/home"; 
     }
 
 
@@ -39,22 +48,22 @@ public class GameControllers {
 	@GetMapping("/game")
 	public String game(Model model) {
         // Creamos el usuario "de mentira" para que la web cargue
-        Usuario user = new Usuario("Geralt_De_Rivia", "Guerrero", null, true);
+//        Usuario user = new Usuario("Geralt_De_Rivia", "Guerrero", null, true);
         
         // Enviamos los datos al HTML
-        model.addAttribute("usuario", user);
-        
-        // Enviamos listas vacías para que los bucles (th:each) no den error
-        model.addAttribute("criaturas", new ArrayList<>());
-        model.addAttribute("misRuns", new ArrayList<>());
-        model.addAttribute("eventos", new ArrayList<>());
-        
-        // Variables de estado mínimas
-        model.addAttribute("progreso", 0);
-        model.addAttribute("esPlayback", false);
-        model.addAttribute("derrota", false);
-        model.addAttribute("combateTerminado", true);
-
+//        model.addAttribute("usuario", user);
+//        
+//        // Enviamos listas vacías para que los bucles (th:each) no den error
+//        model.addAttribute("criaturas", new ArrayList<>());
+//        model.addAttribute("misRuns", new ArrayList<>());
+//        model.addAttribute("eventos", new ArrayList<>());
+//        
+//        // Variables de estado mínimas
+//        model.addAttribute("progreso", 0);
+//        model.addAttribute("esPlayback", false);
+//        model.addAttribute("derrota", false);
+//        model.addAttribute("combateTerminado", true);
+//
         return "game";
 	}
 
